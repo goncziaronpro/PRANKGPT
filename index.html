@@ -272,6 +272,20 @@ function generatePrank() {
   document.getElementById("result").textContent =
     pranks[random];
 }
+
+function selectExperience(name) {
+  const result = document.getElementById("result");
+
+  if (name === "DO NOT CLICK") {
+    result.textContent =
+      "YOU WERE WARNED... HORROR MODE IS COMING.";
+    return;
+  }
+
+  result.textContent =
+    name + " SELECTED! YOUR EXPERIENCE IS COMING SOON.";
+}
+
 </script>
 
 </body>
