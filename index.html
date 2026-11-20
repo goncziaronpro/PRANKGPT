@@ -201,9 +201,33 @@ footer {
     Your funniest AI experience starts here.
   </p>
 
-  <button onclick="generatePrank()">
-    GENERATE A PRANK
+  
+<div class="experience-menu">
+  <button class="experience-btn" onclick="selectExperience('PRANKGPT')">
+    🤖 PRANKGPT
   </button>
+
+  <button class="experience-btn" onclick="selectExperience('PRANKY')">
+    😂 PRANKY
+  </button>
+
+  <button class="experience-btn" onclick="selectExperience('GLITCH')">
+    ⚡ GLITCH
+  </button>
+
+  <button class="experience-btn" onclick="selectExperience('CHATY')">
+    💬 CHATY
+  </button>
+
+  <button class="experience-btn" onclick="selectExperience('CHAOS')">
+    💥 CHAOS
+  </button>
+
+  <button class="experience-btn horror-btn" onclick="selectExperience('DO NOT CLICK')">
+    ☠ DO NOT CLICK
+  </button>
+</div>
+
 
   <div class="result" id="result">
     Your next prank is waiting...
