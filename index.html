@@ -233,27 +233,27 @@ footer {
 
   
 <div class="experience-menu">
-  <button class="experience-btn" onclick="selectExperience('PRANKGPT')">
+  <button class="experience-btn" onclick="openChat('PRANKGPT')">
     🤖 PRANKGPT
   </button>
 
-  <button class="experience-btn" onclick="selectExperience('PRANKY')">
+  <button class="experience-btn" onclick="openChat('PRANKY')">
     😂 PRANKY
   </button>
 
-  <button class="experience-btn" onclick="selectExperience('GLITCH')">
+  <button class="experience-btn" onclick="openChat('GLITCH')">
     ⚡ GLITCH
   </button>
 
-  <button class="experience-btn" onclick="selectExperience('CHATY')">
+  <button class="experience-btn" onclick="openChat('CHATY')">
     💬 CHATY
   </button>
 
-  <button class="experience-btn" onclick="selectExperience('CHAOS')">
+  <button class="experience-btn" onclick="openChat('CHAOS')">
     💥 CHAOS
   </button>
 
-  <button class="experience-btn horror-btn" onclick="selectExperience('DO NOT CLICK')">
+  <button class="experience-btn horror-btn" onclick="openChat('DO NOT CLICK')">
     ☠ DO NOT CLICK
   </button>
 </div>
@@ -338,7 +338,10 @@ footer {
   <br><br>
   THE CHAOS IS JUST BEGINNING.
 </footer>
-
+function openChat(character) {
+  window.location.href =
+    "chat.html?character=" + encodeURIComponent(character);
+}
 <script>
 
 const pranks = [
