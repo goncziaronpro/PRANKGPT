@@ -340,6 +340,7 @@ footer {
 </footer>
 
 <script>
+
 const pranks = [
   "Put googly eyes on everyday objects!",
   "Give your chair an official name!",
@@ -350,25 +351,166 @@ const pranks = [
   "Create a secret handshake with your family!"
 ];
 
-function generatePrank() {
-  const random = Math.floor(Math.random() * pranks.length);
+const greetings = {
+  "PRANKGPT": "Hey! 😎 I'm PRANKGPT. What are we creating today?",
+  "PRANKY": "HAHA! 😂 PRANKY IS HERE!",
+  "GLITCH": "SYSTEM ONLINE... WELCOME TO GLITCH.",
+  "CHATY": "Hey there! 💬 Let's talk!",
+  "CHAOS": "WARNING! 💥 CHAOS MODE ACTIVATED!",
+  "DO NOT CLICK": "YOU WERE WARNED... 👁️"
+};
 
-  document.getElementById("result").textContent =
-    pranks[random];
+let activeCharacter = "PRANKGPT";
+let activeConversation = null;
+
+function getAllChats() {
+  return JSON.parse(localStorage.getItem("prankgpt_chats") || "{}");
+}
+
+function saveAllChats(chats) {
+  localStorage.setItem("prankgpt_chats", JSON.stringify(chats));
 }
 
 function selectExperience(name) {
-  const result = document.getElementById("result");
+  activeCharacter = name;
+  document.getElementById("chatTitle").textContent = name;
+  document.getElementById("chatWindow").style.display = "block";
 
-  if (name === "DO NOT CLICK") {
-    result.textContent =
-      "YOU WERE WARNED... ARE YOU SURE?";
-    return;
+  const chats = getAllChats();
+  const characterChats = chats[name] || [];
+
+  if (characterChats.length > 0) {
+    loadConversation(characterChats[characterChats.length - 1].id);
+  } else {
+    startNewChat();
   }
 
-  result.textContent =
-    name + " SELECTED! YOUR EXPERIENCE IS COMING SOON.";
+  document.getElementById("chatWindow").scrollIntoView({
+    behavior: "smooth",
+    block: "center"
+  });
 }
+
+function startNewChat() {
+  const chats = getAllChats();
+
+  if (!chats[activeCharacter]) {
+    chats[activeCharacter] = [];
+  }
+
+  const conversation = {
+    id: String(Date.now()),
+    title: "New conversation",
+    messages: [
+      { role: "ai", text: greetings[activeCharacter] }
+    ]
+  };
+
+  chats[activeCharacter].push(conversation);
+  saveAllChats(chats);
+
+  activeConversation = conversation.id;
+  renderConversation(conversation);
+  updateHistory();
+}
+
+function updateHistory() {
+  const select = document.getElementById("chatHistorySelect");
+  const chats = getAllChats();
+  const characterChats = chats[activeCharacter] || [];
+
+  select.innerHTML = "";
+
+  characterChats.forEach(chat => {
+    const option = document.createElement("option");
+    option.value = chat.id;
+    option.textContent = chat.title;
+    select.appendChild(option);
+  });
+
+  select.value = activeConversation || "";
+}
+
+function loadConversation(id) {
+  if (!id) return;
+
+  const chats = getAllChats();
+  const conversation = (chats[activeCharacter] || [])
+    .find(chat => chat.id === id);
+
+  if (!conversation) return;
+
+  activeConversation = id;
+  renderConversation(conversation);
+  updateHistory();
+}
+
+function renderConversation(conversation) {
+  const messages = document.getElementById("chatMessages");
+  messages.innerHTML = "";
+
+  conversation.messages.forEach(message => {
+    const bubble = document.createElement("div");
+    bubble.className =
+      message.role === "user" ? "user-message" : "ai-message";
+    bubble.textContent = message.text;
+    messages.appendChild(bubble);
+  });
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById("chatInput");
+  const message = input.value.trim();
+
+  if (!message || !activeConversation) return;
+
+  const chats = getAllChats();
+  const conversation = (chats[activeCharacter] || [])
+    .find(chat => chat.id === activeConversation);
+
+  if (!conversation) return;
+
+  conversation.messages.push({
+    role: "user",
+    text: message
+  });
+
+  if (conversation.title === "New conversation") {
+    conversation.title = message.slice(0, 30);
+  }
+
+  const reply = activeCharacter +
+    ": Message received! 😎 Real AI connection coming soon.";
+
+  conversation.messages.push({
+    role: "ai",
+    text: reply
+  });
+
+  saveAllChats(chats);
+  input.value = "";
+
+  renderConversation(conversation);
+  updateHistory();
+}
+
+function closeChat() {
+  document.getElementById("chatWindow").style.display = "none";
+}
+
+function generatePrank() {
+  const random = Math.floor(Math.random() * pranks.length);
+  document.getElementById("result").textContent = pranks[random];
+}
+
+document.getElementById("chatInput").addEventListener(
+  "keydown",
+  function(event) {
+    if (event.key === "Enter") sendMessage();
+  }
+);
 
 </script>
 
