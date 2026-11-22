@@ -1,1 +1,322 @@
 
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>PRANKGPT — AI Chat</title>
+
+<style>
+:root {
+  --purple: #9b5cff;
+  --green: #a5ff00;
+  --cyan: #27eaff;
+  --bg: #090914;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 20px 6%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid #302344;
+}
+
+.logo {
+  color: var(--purple);
+  font-weight: 900;
+  letter-spacing: 3px;
+}
+
+.back {
+  color: white;
+  text-decoration: none;
+  border: 1px solid var(--purple);
+  padding: 11px 18px;
+  border-radius: 25px;
+}
+
+main {
+  max-width: 900px;
+  margin: auto;
+  padding: 35px 18px;
+}
+
+.status {
+  color: var(--green);
+  font-size: 12px;
+  letter-spacing: 2px;
+  text-align: center;
+}
+
+h1 {
+  text-align: center;
+  font-size: clamp(32px, 7vw, 55px);
+  margin: 15px 0;
+}
+
+.chat {
+  margin-top: 35px;
+  border: 1px solid var(--purple);
+  border-radius: 22px;
+  overflow: hidden;
+  background: #10101e;
+  box-shadow: 0 0 30px #9b5cff33;
+}
+
+.chat-top {
+  padding: 20px;
+  background: #1b1730;
+  border-bottom: 1px solid #39304f;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.chat-top h2 {
+  color: var(--green);
+  margin: 0;
+}
+
+.history {
+  display: flex;
+  gap: 10px;
+  padding: 14px;
+  border-bottom: 1px solid #39304f;
+}
+
+select {
+  flex: 1;
+  min-width: 0;
+  background: #211a35;
+  color: white;
+  border: 1px solid var(--purple);
+  padding: 12px;
+  border-radius: 20px;
+}
+
+button {
+  cursor: pointer;
+  border: 0;
+  color: white;
+  font-weight: bold;
+  padding: 13px 20px;
+  border-radius: 25px;
+  background: linear-gradient(100deg, var(--purple), #5e35d5, #15bfcf);
+}
+
+.messages {
+  height: 420px;
+  overflow-y: auto;
+  padding: 22px;
+}
+
+.ai-message, .user-message {
+  padding: 14px 17px;
+  border-radius: 15px;
+  margin-bottom: 15px;
+  max-width: 85%;
+  line-height: 1.5;
+  overflow-wrap: anywhere;
+}
+
+.ai-message {
+  background: #211a35;
+  border: 1px solid #7046a8;
+}
+
+.user-message {
+  background: #26334a;
+  border: 1px solid var(--cyan);
+  margin-left: auto;
+}
+
+.input-area {
+  display: flex;
+  gap: 10px;
+  padding: 17px;
+  border-top: 1px solid #39304f;
+}
+
+input {
+  flex: 1;
+  min-width: 0;
+  padding: 15px;
+  border-radius: 30px;
+  background: #1b1730;
+  color: white;
+  border: 1px solid var(--purple);
+  outline: none;
+}
+
+@media(max-width:600px) {
+  .messages { height: 55vh; }
+  .history { flex-wrap: wrap; }
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">PRANKGPT</div>
+  <a class="back" href="index.html">← HOME</a>
+</header>
+
+<main>
+  <div class="status">● AI SYSTEM ONLINE</div>
+  <h1 id="characterTitle">PRANKGPT</h1>
+
+  <div class="chat">
+    <div class="chat-top">
+      <div>
+        <h2 id="chatName">PRANKGPT</h2>
+        <span class="status">● ONLINE</span>
+      </div>
+      <span>🤖</span>
+    </div>
+
+    <div class="history">
+      <select id="historySelect" onchange="loadChat(this.value)">
+        <option value="">Conversation history</option>
+      </select>
+      <button onclick="newChat()">+ NEW</button>
+    </div>
+
+    <div class="messages" id="messages"></div>
+
+    <div class="input-area">
+      <input id="messageInput" placeholder="Message PRANKGPT...">
+      <button onclick="sendMessage()">➤</button>
+    </div>
+  </div>
+</main>
+
+<script>
+const params = new URLSearchParams(location.search);
+const character = params.get("character") || "PRANKGPT";
+
+const greetings = {
+  "PRANKGPT": "Hey! 😎 I'm PRANKGPT. What are we creating today?",
+  "PRANKY": "HAHA! 😂 PRANKY IS HERE!",
+  "GLITCH": "SYSTEM ONLINE... WELCOME TO GLITCH.",
+  "CHATY": "Hey there! 💬 Let's talk!",
+  "CHAOS": "WARNING! 💥 CHAOS MODE ACTIVATED!",
+  "DO NOT CLICK": "YOU WERE WARNED... 👁️"
+};
+
+let activeChat = null;
+
+function getChats() {
+  return JSON.parse(localStorage.getItem("prankgpt_chats") || "{}");
+}
+
+function saveChats(chats) {
+  localStorage.setItem("prankgpt_chats", JSON.stringify(chats));
+}
+
+function newChat() {
+  const chats = getChats();
+  if (!chats[character]) chats[character] = [];
+
+  const chat = {
+    id: String(Date.now()),
+    title: "New conversation",
+    messages: [{ role: "ai", text: greetings[character] || greetings.PRANKGPT }]
+  };
+
+  chats[character].push(chat);
+  saveChats(chats);
+  activeChat = chat.id;
+  renderChat(chat);
+  updateHistory();
+}
+
+function updateHistory() {
+  const select = document.getElementById("historySelect");
+  const chats = getChats()[character] || [];
+
+  select.innerHTML = "";
+
+  chats.forEach(chat => {
+    const option = document.createElement("option");
+    option.value = chat.id;
+    option.textContent = chat.title;
+    select.appendChild(option);
+  });
+
+  select.value = activeChat || "";
+}
+
+function loadChat(id) {
+  const chat = (getChats()[character] || []).find(c => c.id === id);
+  if (!chat) return;
+
+  activeChat = id;
+  renderChat(chat);
+  updateHistory();
+}
+
+function renderChat(chat) {
+  const messages = document.getElementById("messages");
+  messages.innerHTML = "";
+
+  chat.messages.forEach(message => {
+    const bubble = document.createElement("div");
+    bubble.className = message.role === "user"
+      ? "user-message" : "ai-message";
+    bubble.textContent = message.text;
+    messages.appendChild(bubble);
+  });
+
+  messages.scrollTop = messages.scrollHeight;
+}
+
+function sendMessage() {
+  const input = document.getElementById("messageInput");
+  const text = input.value.trim();
+  if (!text || !activeChat) return;
+
+  const chats = getChats();
+  const chat = (chats[character] || []).find(c => c.id === activeChat);
+  if (!chat) return;
+
+  chat.messages.push({ role: "user", text });
+
+  if (chat.title === "New conversation") {
+    chat.title = text.slice(0, 30);
+  }
+
+  chat.messages.push({
+    role: "ai",
+    text: character + ": Message received! 😎 Real AI connection coming soon."
+  });
+
+  saveChats(chats);
+  input.value = "";
+  renderChat(chat);
+  updateHistory();
+}
+
+document.getElementById("messageInput").addEventListener("keydown", event => {
+  if (event.key === "Enter") sendMessage();
+});
+
+document.getElementById("characterTitle").textContent = character;
+document.getElementById("chatName").textContent = character;
+
+newChat();
+</script>
+
+</body>
+</html>
+
